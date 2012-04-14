@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      pre {
+        margin: 0;
+        padding: 0;
+      }
+      .covered {
+        background: #dfd;
+      }
+      .uncovered {
+        background: #fdd;
+      }
+      a, a:visited {
+        color:black;
+        font-size:14pt;
+        font-family:fixed;
+      }
+      .filename {
+        width: 350px;
+        display: block;
+        float: left;
+        overflow: hidden;
+        line-height: 25px;
+        height: 25px;
+        vertical-align: middle;
+      }
+      div.file {
+        clear: both;
+        height: 26px;
+      }
+      div.gauge {
+        border-bottom: 8px solid lightgreen;
+        height: 18px;
+        float: left;
+        white-space: nowrap;
+      }
+    </style>
+    <script>
+      function init () {
+        var id = location.href.split('#')[1];
+        var el = document.getElementById(id);
+        el.style.display = '';
+        setTimeout(function () {
+          // window.scroll(0, el.offsetTop);
+        }, 100);
+      }
+      document.addEventListener('DOMContentLoaded', init);
+    </script>
+  </head>
+  <body>
+    CODE
+  </body>
+</html>

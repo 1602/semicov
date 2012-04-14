@@ -1,0 +1,12 @@
+{
+  "author": "Anatoliy Chakkaev <rpm1602@gmail.com>",
+  "name": "semicov",
+  "version": "0.0.0",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}
