@@ -1,55 +1,55 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css">
+    <link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/js/google-code-prettify/prettify.css">
     <style>
+      code { background: none; color: none; border: none; };
+      li code { white-space: pre-wrap; margin: 0; padding: 0; border: 0; border-radius: 0; line-height: 18px }
+      .covered { background: #cfc; }
+      .uncovered { background: #fcc; }
+      a, a:visited { color:black; font-size:14pt; }
+      pre li .hits {
+        float: right;
+        margin-left: 10px;
+        padding: 2px 4px;
+        background: linear-gradient(#222, #666);
+        background: -webkit-gradient(linear, 0 0, 0 bottom, from(#222), to(#666));
+        background: -moz-linear-gradient(#222, #666);
+        background: linear-gradient(#222, #666);
+        color: white;
+        font-family: Helvetica, "Helvetica Neue", Arial, sans-serif;
+        font-size: 10px;
+        font-weight: bold;
+        text-align: center;
+        border-radius: 3px;
+        line-height: 10px;
+      }
+
       pre {
-        margin: 0;
-        padding: 0;
+        border: none;
+        background: none;
       }
-      .covered {
-        background: #dfd;
-      }
-      .uncovered {
-        background: #fdd;
-      }
-      a, a:visited {
-        color:black;
-        font-size:14pt;
-        font-family:fixed;
-      }
-      .filename {
-        width: 350px;
-        display: block;
-        float: left;
-        overflow: hidden;
-        line-height: 25px;
-        height: 25px;
-        vertical-align: middle;
-      }
-      div.file {
-        clear: both;
-        height: 26px;
-      }
-      div.gauge {
-        border-bottom: 8px solid lightgreen;
-        height: 18px;
-        float: left;
-        white-space: nowrap;
-      }
+
+      .S{color:red}
+      .func{color:blue}
+      .C{color:orange}
+      .kwrd{font-weight:bold}
+      .R{color:gray}
+
     </style>
     <script>
-      function init () {
+      function init() {
         var id = location.href.split('#')[1];
-        var el = document.getElementById(id);
-        el.style.display = '';
-        setTimeout(function () {
-          // window.scroll(0, el.offsetTop);
-        }, 100);
+        if (id)
+          document.getElementById(id).style.display = '';
       }
       document.addEventListener('DOMContentLoaded', init);
     </script>
   </head>
   <body>
-    CODE
+    <div class="container">
+      CODE
+    </div>
   </body>
 </html>

@@ -1,4 +1,4 @@
-Crappy test coverage tool. It just works. It also can generate some shitty report.
+Simple test coverage tool. It can generate nifty html report.
 
 ## Installation
 

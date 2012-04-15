@@ -2,7 +2,10 @@ var Module = require('module');
 var path = require('path');
 var fs = require('fs');
 
-var addCoverage = exports.addCoverage = function (code, filename) {
+exports.addCoverage = function addCoverage(code, filename) {
+    if (!~filename.indexOf(addCoverage.subdir)) {
+        return code;
+    }
     var lines = code.split('\n');
 
     if (lines.length > 0) {
@@ -29,10 +32,11 @@ exports.init = function init(subdir) {
         subdir = path.join(process.cwd(), subdir);
     }
     global.__cov = {};
+    exports.addCoverage.subdir = subdir;
     var compile = Module.prototype._compile;
     Module.prototype._compile = function (code, filename) {
         if (~filename.indexOf(subdir)) {
-            code = addCoverage(code, filename);
+            code = exports.addCoverage(code, filename);
         }
         return compile.call(this, code, filename);
     };
@@ -53,7 +57,7 @@ function coverageReport() {
         if (file.search(cwd) === -1 || file.search(cwd + '/node_modules') !== -1) continue;
         var shortFileName = file.replace(cwd + '/', '');
         var id = shortFileName.replace(/[^a-z]+/gi, '-').replace(/^-|-$/, '');
-        var code = fs.readFileSync(file).toString().split('\n');
+        var code = syntax(fs.readFileSync(file).toString()).split('\n');
         var cnt = code.filter(function (line) {
             return line.match(/;$/) && !line.match(/^\s\*\s/);
         }).length;
@@ -62,18 +66,32 @@ function coverageReport() {
         var coveredPercentage = cnt === 0 ? 100 : Math.round((covered / cnt) * 100);
         total_covered += covered;
         total_lines += cnt;
-        var html = '<div class="file"><a href="#' + id + '" class="filename" name="' + id +
-        '" onclick="var el = document.getElementById(\'' + id +
-        '\'); el.style.display = el.style.display ? \'\' : \'none\';">' + shortFileName +
-        '</a> <div class="gauge" style="width: ' + (3 * coveredPercentage) +
-        'px"><strong>' + coveredPercentage + '%</strong> [' + cnt + ' to cover, ' +
-        code.length + ' total]</div></div>\n';
-
-        html += '<div id="' + id + '" style="display:none;">';
-        code.forEach(function (line, i) {
-            html += '<pre class="' + (__cov[file][i] ? 'covered' : (line.match(/;$/) && !line.match(/ \* /) ? 'uncovered' : '')) + '">' + i + '. ' + line + '</pre>\n';
-        });
+        var html = '<div class="row">';
+        html += '<div class="span3">';
+        html += '<a href="#' + id +
+            '" class="filename" name="' + id +
+            '" onclick="var el = document.getElementById(\'' + id +
+            '\'); el.style.display = el.style.display ? \'\' : \'none\';">' + shortFileName +
+            '</a>';
+        html += '</div><div class="span6">';
+        var progressClass = 'progress-danger';
+        if (coveredPercentage > 30) progressClass = 'progress-warning';
+        if (coveredPercentage >= 80) progressClass = 'progress-success';
+        html += '<div class="progress ' + progressClass + '"> <div class="bar" style="width: ' + coveredPercentage +
+            '%"><strong>' + coveredPercentage +
+            '%</strong> [' + cnt + '/' +
+            code.length + ']</div></div></div>';
         html += '</div>';
+
+        html += '<div id="' + id + '" style="display:none;"><pre><ol>';
+        code.forEach(function (line, i) {
+            html += '<li class="' + (__cov[file][i] ? 'covered' : (line.match(/;$/) && !line.match(/ \* /) ? 'uncovered' : '')) + '"><code>' + line + '</code>';
+            if (__cov[file][i] && i) {
+                html += '<span class="hits">' + __cov[file][i] + '</span>';
+            }
+            html += '</li>';
+        });
+        html += '</ol></pre></div>';
 
         if (cnt > 1) {
             files.push({
@@ -94,3 +112,39 @@ function coverageReport() {
     console.log('====================');
     console.log('TOTAL COVERAGE:', Math.round((total_covered / (total_lines)) * 100) + '%');
 }
+
+function syntax(code) {
+    var comments    = [];
+    var strings     = [];
+    var res         = [];
+    var all         = { 'C': comments, 'S': strings, 'R': res };
+    var safe        = { '<': '<', '>': '>', '&': '&' };
+
+    return code
+        .replace(/[<>&]/g, function (m)
+            { return safe[m]; })
+        .replace(/\/\*[\s\S]*?\*\//g, function(m)
+            { var l=comments.length; comments.push(m); return '~~~C'+l+'~~~';   })
+        .replace(/([^\\])((?:'(?:\\'|[^'])*')|(?:"(?:\\"|[^"])*"))/g, function(m, f, s)
+            { var l=strings.length; strings.push(s); return f+'~~~S'+l+'~~~'; })
+        .replace(/\/\/.*/g, function(m, f)
+            { var l=comments.length; comments.push(m); return '~~~C'+l+'~~~'; })
+        .replace(/\/(\\\/|[^\/\n])*\/[gim]{0,3}/g, function(m)
+            { var l=res.length; res.push(m); return '~~~R'+l+'~~~';   })
+        .replace(/(var|function|typeof|new|return|if|for|in|while|break|do|continue|switch|case)([^a-z0-9\$_])/gi,
+            '<span class="kwrd">$1</span>$2')
+        .replace(/(\{|\}|\]|\[|\|)/gi,
+            '<span class="gly">$1</span>')
+        .replace(/([a-z\_\$][a-z0-9_]*)[\s]*\(/gi,
+            '<span class="func">$1</span>(')
+        .replace(/~~~([CSR])(\d+)~~~/g, replaceCSR)
+
+    function replaceCSR(m, t, i) {
+        var openTag = '<span class="' + t + '">';
+        var closeTag = '</span>';
+        return openTag +
+            all[t][i].replace(/\n/g, closeTag + '\n' + openTag) +
+            closeTag;
+    }
+}
+
