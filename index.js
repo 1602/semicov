@@ -3,6 +3,7 @@ var path = require('path');
 var fs = require('fs');
 
 exports.addCoverage = function addCoverage(code, filename) {
+    filename = filename.replace(/\\/g, '\\\\');
     if (!~filename.indexOf(addCoverage.subdir)) {
         return code;
     }
