@@ -1,4 +1,6 @@
-Test coverage tool. It can generate nifty html report.
+Test coverage tool. It generates html report like that:
+
+    http://1602.ws/railwayjs/test-coverage
 
 ## Installation
 
@@ -22,11 +24,10 @@ So, basically it should work very well for any code passed following [jslint](ht
 
 Put following line before very first line of your code
 
-    require('semicov').init('lib'); // 'lib' is name of dir with code
-
-Optionally put this code somewhere
-
+    require('semicov').init('lib', 'My Awesome Lib Name');
+    // First argument 'lib' is name of dir with code
+    // Second argument is (optinal) title of your project
     process.on('exit', require('semicov').report);
 
-And it will generate `./coverage.html` for you.
+And it will generate `./coverage/index.html` for you.
 
