@@ -41,6 +41,10 @@ exports.init = function init(subdir, name) {
     global.__cov = {};
     exports.addCoverage.subdir = subdir;
     var compile = Module.prototype._compile;
+    Object.keys(Module._cache).forEach(function (path) {
+        if (path.match(/node_modules/)) return;
+        delete Module._cache[path];
+    });
     Module.prototype._compile = function (code, filename) {
         if (~filename.indexOf(subdir)) {
             code = exports.addCoverage(code, filename);
