@@ -6,6 +6,10 @@
   "dependencies": {},
   "devDependencies": {},
   "optionalDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/1602/semicov"
+  },
   "engines": {
     "node": "*"
   },
