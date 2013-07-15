@@ -4,7 +4,7 @@ var fs = require('fs');
 
 exports.addCoverage = function addCoverage(code, filename) {
     filename = filename.replace(/\\/g, '\\\\');
-    if (!~filename.indexOf(addCoverage.subdir)) {
+    if (!eligibleForCoverage(filename)) {
         return code;
     }
     if (process.env.COVERAGE && !~filename.indexOf(process.env.COVERAGE)) {
@@ -28,6 +28,19 @@ exports.addCoverage = function addCoverage(code, filename) {
     return lines.join('\n');
 };
 
+var eligibleForCoverage = exports.eligibleForCoverage = function (filename) {
+    var p = exports.addCoverage.paths;
+    if (typeof p === 'string') {
+        return ~filename.indexOf(p);
+    } else if (p instanceof RegExp) {
+        return filename.match(p);
+    } else if (p instanceof Array) {
+        return p.some(function(x) {
+            return !!~filename.indexOf(x);
+        });
+    }
+};
+
 var projectName;
 
 exports.init = function init(subdir, name) {
@@ -35,18 +48,24 @@ exports.init = function init(subdir, name) {
     if (process.env.NOCOV || global.__cov) return;
     if (!subdir) {
         subdir = process.cwd();
-    } else if (!subdir.match(/^\//)) {
-        subdir = path.join(process.cwd(), subdir);
+    } else if (typeof subdir === 'string') {
+        if (!subdir.match(/^\//)) {
+            subdir = path.join(process.cwd(), subdir);
+        }
+    } else if (subdir instanceof Array) {
+        subdir = subdir.map(function(x) {
+            return x.match(/^\//) ? x : path.join(process.cwd(), x);
+        });
     }
     global.__cov = {};
-    exports.addCoverage.subdir = subdir;
+    exports.addCoverage.paths = subdir;
     var compile = Module.prototype._compile;
     Object.keys(Module._cache).forEach(function (path) {
         if (path.match(/node_modules/)) return;
         delete Module._cache[path];
     });
     Module.prototype._compile = function (code, filename) {
-        if (~filename.indexOf(subdir)) {
+        if (eligibleForCoverage(filename)) {
             code = exports.addCoverage(code, filename);
         }
         return compile.call(this, code, filename);
