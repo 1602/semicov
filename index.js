@@ -13,7 +13,11 @@ exports.addCoverage = function addCoverage(code, filename) {
     var lines = code.split('\n');
 
     if (lines.length > 0) {
-        lines[0] = 'if (!__cov["' + filename + '"]) {__cov["' + filename + '"] = { 0: 1}; }' + lines[0];
+        if (lines[0].match(/use strict/)) {
+            lines[0] = lines[0] + ' if (!__cov["' + filename + '"]) {__cov["' + filename + '"] = { 0: 1}; }';
+        } else {
+            lines[0] = 'if (!__cov["' + filename + '"]) {__cov["' + filename + '"] = { 0: 1}; }' + lines[0];
+        }
     }
 
     for (var i = 0; i < lines.length; i++) {
